@@ -1,28 +1,37 @@
 const mongoose = require('mongoose');
 
+// Схема для эффекта карты
 const effectSchema = new mongoose.Schema({
-    type: { type: String, enum: ['production', 'exchange', 'compensation'], required: true },
-    action: { type: String, required: true },
-    details: { type: mongoose.Schema.Types.Mixed },
-    maxUses: { type: Number, default: 1 }
+    type: {
+        type: String,
+        enum: ['production', 'exchange'], // Ограничиваем тип эффекта двумя значениями
+        required: true
+    },
+    details: {
+        type: mongoose.Schema.Types.Mixed // тут хранятся эффекты 1) from = [] -> to = [] в cлучае exchange;
+        // what = [] для  production
+    },
+    maxUses: {
+        type: Number,
+        default: 0 // Указываем максимальное количество использований, по умолчанию 0
+    }
 });
 
-const cardSideSchema = new mongoose.Schema({
-    side: { type: String, enum: ['A', 'B'], required: true },
-    productionEffects: [effectSchema],
-    compensationEffects: [effectSchema],
-    isUpgraded: { type: Boolean, default: false }
-});
-
+// Схема для карты
 const cardSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    type: { type: String, required: true },
-    value: { type: Number, default: 0 },
-    imageUrl: { type: String, default: '' },
-    sides: [cardSideSchema],
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Player', default: null },
-    isActive: { type: Boolean, default: false },
-    isUsedInProduction: { type: Boolean, default: false },
-}, { timestamps: true });
+    name: {
+        type: String,
+        required: true // Имя карты обязательно
+    },
+    type: {
+        type: String,
+        enum: ['starting', 'enterprise'], // Ограничиваем тип карты
+        required: true
+    },
+    compensation: effectSchema, // Схема для компенсации карты
+    firstSide: effectSchema, // Схема для первой стороны карты
+    secondSide: effectSchema // Схема для второй стороны карты
+});
+
 
 module.exports = mongoose.model('Card', cardSchema);
